@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JS Buttons</title>
+	<link type="text/css" rel="stylesheet" href="options.css"></link>
+</head>
+<body>
+	<form id="jsBtnForm" name="jsBtnForm">
+		<fieldset style="display:none">
+			<legend>Configuration:</legend>
+			<div>
+				<label for="jsBtnDefault">Default Script:</label>
+				<textarea type="text" id="jsBtnDefault" name="jsBtnDefault" rows="5"></textarea>
+			</div>
+			<div>
+				<label class="large">
+					<input type="checkbox" id="jsBtnUseDef" name="jsBtnUseDef" />
+					Use Default Script for non-specified pages
+				</label>
+			</div>
+		</fieldset>
+		<fieldset>
+			<legend>Active scripts:</legend>
+			<div class="jsBtnList">
+				<table id="jsBtnList">
+					<thead>
+						<th width="35%" colspan="2">Site</th>
+						<th width="65%">Script</th>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</fieldset>
+		<fieldset>
+			<legend>Add another script:</legend>
+			<div>
+				<label for="jsBtnAddSite">Site or page</label>
+				<input type="text" id="jsBtnAddSite" name="jsBtnAddSite" />
+			</div>
+			<div>
+				<label for="jsBtnAddScript">Script:</label>
+				<textarea type="text" id="jsBtnAddScript" name="jsBtnAddScript" rows="5"></textarea>
+			</div>
+			<div>
+				<button id="jsBtnSaveAdd">Add</button>
+			</div>
+		</fieldset>
+		<div>
+			<button id="jsBtnSave">Save Changes</button>
+		</div>
+	</form>
+	<script src="options.js"></script>
+</body>
+</html>

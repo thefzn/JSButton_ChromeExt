@@ -1,0 +1,31 @@
+{
+	"manifest_version": 2,
+
+	"name": "JS Buttons",
+	"description": "This extension allows us to quickly execute our own JavaScript code on demand over specified websites",
+	"version": "1.0.0",
+	"icons": {
+		"16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+	},
+
+	"background": {
+		"scripts": ["bg.js"]
+	},
+	
+	"permissions" : [
+		"declarativeContent",
+		"activeTab"
+	],
+
+	"page_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html"
+	},
+	
+	"options_ui": {
+		"page": "options.html",
+		"chrome_style": true
+	}
+}
