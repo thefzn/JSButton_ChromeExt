@@ -82,7 +82,8 @@ fieldset .jsBtnScript{
 	font-family:Courier New;
 	color: #3489B4;
 }
-fieldset .jsBtnRemove {
+fieldset .jsBtnRemove,
+fieldset .jsBtnRemoveSaved {
 	border: 0 none;
     background: none #666 !important;
     box-shadow: none !important;
@@ -99,10 +100,12 @@ fieldset .jsBtnRemove {
     cursor: pointer;
     overflow: hidden;
 }
-fieldset .jsBtnRemove:hover {
+fieldset .jsBtnRemove:hover,
+fieldset .jsBtnRemoveSaved:hover {
     background: #EE4030 !important;
 }
-fieldset .jsBtnRemove:before {
+fieldset .jsBtnRemove:before,
+fieldset .jsBtnRemoveSaved:before {
 	content:"x";
 	display:block;
 	width:17px;

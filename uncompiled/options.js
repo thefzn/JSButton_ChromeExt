@@ -1,34 +1,55 @@
 "use strict"
 var JSBtnOptions = {
 	data:null,
+	rel:[],
+	saved:{},
 	getScripts: function(){
 		var me = this;
 		// Load stored scripts
 		chrome.storage.sync.get("jsbtn",function(jsbtn){
-			var container,i,len,tmp,removeBtns;
-			this.data = jsbtn.jsbtn;
+			var count = 0,
+				container,i,len,tmp,removeBtns;
+			me.data = jsbtn.jsbtn || {};
 			// Display the active scripts
 			container = document.querySelector("#jsBtnList tbody");
-			if(this.data.pages && this.data.pages instanceof Array && this.data.pages.length){
-				for(i = 0, len = this.data.pages.length; i < len; i++){
+			if(me.data && me.data.pages && me.data.pages instanceof Array && me.data.pages.length){
+				for(i = 0, len = me.data.pages.length; i < len; i++){
 					tmp = document.createElement("tr");
 					container.appendChild(tmp);
 					tmp.id = 'item' + i;
 					tmp.innerHTML = '<td>' +
 									'	<button name="jsBtn_Btn' + i + '" id="jsBtn_Btn' + i + '" class="jsBtnRemove">X</button>' +
 									'</td><td>' + 
-									'	<input type="text" name="jsBtn_Sites[' + i + ']" id="jsBtn_Site' + i + '" value="' + this.data.pages[i].replace(/"/g, "'").replace(/'/g, '\'') + '">'+
+									'	<input type="text" name="jsBtn_Sites[' + i + ']" id="jsBtn_Site' + i + '" value="' + me.data.pages[i].replace(/"/g, '\"') + '">'+
 									'</td><td>' + 
-									'	<textarea name="jsBtn_Scripts[' + i + ']" id="jsBtn_Script' + i + '" class="jsBtnScript" rows="5">' + this.data.scripts[i].replace(/"/g, "'").replace(/'/g, '\'') + '</textarea>' +
+									'	<textarea name="jsBtn_Scripts[' + i + ']" id="jsBtn_Script' + i + '" class="jsBtnScript" rows="5">' + me.data.scripts[i].replace(/"/g, '\"') + '</textarea>' +
 									'</td>';
 				}
 			}else{
 				document.querySelector(".jsBtnList").style.display = "none";
 			}
-			// Display Conf saved values:
-			if(this.data.def){
-				document.querySelector("#jsBtnDefault").innerHTML = this.data.def.script;
-				document.querySelector("#jsBtnUseDef").checked = this.data.def.active || false;
+			// Display saved settings
+			container = document.querySelector("#jsBtnSavedList tbody");
+			if(me.data && me.data.saved){
+				for(i in me.data.saved){
+					if(!me.validateSaved(i)) continue;
+					tmp = document.createElement("tr");
+					container.appendChild(tmp);
+					tmp.id = 'savedItem' + count;
+					tmp.innerHTML = '<td>' +
+									'	<button name="jsBtn_BtnSave' + count + '" id="jsBtn_BtnSave' + count + '" class="jsBtnRemoveSaved">X</button>' +
+									'</td><td>' + 
+									'	<input type="text" name="jsBtn_Save[' + count + ']" id="jsBtn_Save' + count + '" value="' + i + '" >'+
+									'</td>';
+					me.rel.push(i);
+					me.saved[i] = me.data.saved[i];
+					count++;
+				}
+				if(!count){
+					document.querySelector(".jsBtnSavedList").style.display = "none";
+				}
+			}else{
+				document.querySelector(".jsBtnSavedList").style.display = "none";
 			}
 			// Add remove actions
 			removeBtns = document.querySelectorAll(".jsBtnRemove");
@@ -37,6 +58,14 @@ var JSBtnOptions = {
 				tmp.addEventListener('click',function(e){
 					e.preventDefault();
 					me.removeScript(this.id);
+				});
+			}
+			removeBtns = document.querySelectorAll(".jsBtnRemoveSaved");
+			for(i = 0, len = removeBtns.length; i < len; i++){
+				tmp = removeBtns[i];
+				tmp.addEventListener('click',function(e){
+					e.preventDefault();
+					me.removeSaved(this.id);
 				});
 			}
 		});
@@ -52,8 +81,8 @@ var JSBtnOptions = {
 			alert("Please fill the 'Site or Page' and 'Script' in order to add a new item.");
 			return;
 		}
-		script = script.replace(/"/g, "'").replace(/'/g, '\'');
-		site = site.replace(/"/g, "'").replace(/'/g, '\'');
+		script = script.replace(/"/g, '\"');
+		site = site.replace(/"/g, '\"');
 		
 		tmp = document.createElement("tr");
 		container.appendChild(tmp);
@@ -85,7 +114,16 @@ var JSBtnOptions = {
 		var ind = parseInt(index.replace("jsBtn_Btn","")),
 			toDelete,i,len;
 		document.querySelector("#item" + ind).style.display = "none";
-		toDelete = document.querySelectorAll("#item" + ind + " input");
+		toDelete = document.querySelectorAll("#item" + ind + " input, #item" + ind + " textarea");
+		for(i = 0, len = toDelete.length; i < len; i++){
+			toDelete[i].remove();
+		}
+	},
+	removeSaved: function(index){
+		var ind = parseInt(index.replace("jsBtn_BtnSave","")),
+			toDelete,i,len;
+		document.querySelector("#savedItem" + ind).style.display = "none";
+		toDelete = document.querySelectorAll("#savedItem" + ind + " input");
 		for(i = 0, len = toDelete.length; i < len; i++){
 			toDelete[i].remove();
 		}
@@ -93,34 +131,40 @@ var JSBtnOptions = {
 	saveData: function(){
 		var form = document.forms.jsBtnForm,
 			me = this,
-			data,tmp;
+			data,tmp,i,len,disInputs;
 		
+		disInputs = document.querySelectorAll("input[disabled]");
+		for(i = 0, len = disInputs.length; i < len; i++){
+			disInputs[i].disabled = false;
+		}
 		this.data = {
 			pages:[],
 			scripts:[],
-			def:{}
+			def:{},
+			saved:{}
 		}
 		var data = new FormData(form);
 		data.forEach(function(val, name){
 			if(name == "") return;
-			switch(name){
-				case "jsBtnDefault":
-					me.data.def.script = val;
-				break;
-				case "jsBtnUseDef":
-					me.data.def.active = val || false;
-				break;
-				default:
-					if(name.indexOf("jsBtn_Sites") == 0){
-						me.data.pages.push(val);
-					}
-					if(name.indexOf("jsBtn_Scripts") == 0){
-						me.data.scripts.push(val);
-					}
-				break;
+			if(name.indexOf("jsBtn_Sites") == 0){
+				me.data.pages.push(val);
+			}else if(name.indexOf("jsBtn_Scripts") == 0){
+				me.data.scripts.push(val.replace(/[\n\r]/g,""));
+			}else if(name.indexOf("jsBtn_Save") == 0){
+				tmp = me.rel[parseInt(name.replace("jsBtn_Save[","").replace("]",""))];
+				me.data.saved[tmp] = me.saved[tmp];
 			}
 		});
-		chrome.storage.sync.set({jsbtn:this.data},function(){window.close();});
+		chrome.storage.sync.set({jsbtn:this.data},function(){chrome.extension.getBackgroundPage().JSBtnUpdate();window.close();});
+	},
+	validateSaved: function(saved){
+		var scripts = this.data.pages || false,
+			saved = saved || false,
+			val = "";
+		if(!scripts || !saved) return false;
+		val = "|" + scripts.join("|") + "|";
+		return ~val.indexOf(saved);
+		
 	},
 	init: function(){
 		var me = this;

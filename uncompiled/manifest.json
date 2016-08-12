@@ -3,7 +3,7 @@
 
 	"name": "JS Buttons",
 	"description": "This extension allows us to quickly execute our own JavaScript code on demand over specified websites",
-	"version": "1.0.0",
+	"version": "1.2.1",
 	"icons": {
 		"16": "icon16.png",
         "48": "icon48.png",
@@ -16,6 +16,7 @@
 	
 	"permissions" : [
 		"declarativeContent",
+		"storage",
 		"activeTab"
 	],
 
